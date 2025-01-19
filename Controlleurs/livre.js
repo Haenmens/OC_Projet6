@@ -1,11 +1,11 @@
 const Livre = require("../Modèles/Livres");
+const fs = require("fs");
 
 exports.getBooks = async (req, res, next) => {
     try 
     {
         const livres = await Livre.find();
         res.status(200).json(livres);
-        console.log(livres);
     }
     catch (erreur)
     {
@@ -31,30 +31,110 @@ exports.getBook = async (req, res, next) => {
     }
 };
 
-exports.getBestRatingBooks = (req, res, next) => {
-    console.log("requête pour les 3 meilleurs livres reçue !");
-};
-
-exports.postBook = (req, res, next) => {
-    const nouveauLivre = new Livre({...JSON.parse(req.body.book)});
-    
-    nouveauLivre.imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
-    
-    nouveauLivre.save().then(() => {
-        res.status(200).json({ message: "Nouveau livre ajouté avec succès !"});
-    }).catch((erreur) => {
+exports.getBestRatingBooks = async (req, res, next) => {
+    try
+    {
+        livres = await Livre.find({});
+        meilleursLivres = livres.sort((livreA, livreB) => livreB.averageRating - livreA.averageRating).slice(0, 3);
+        res.status(200).json(meilleursLivres);
+    }
+    catch (erreur)
+    {
         res.status(400).json(erreur);
-    });
+        console.log("test");
+    }
 };
 
-exports.putBook = (req, res, next) => {
-    console.log("requête de mise à jour d'un livre reçue !");
+exports.postBook = async (req, res, next) => {
+    try
+    {
+        const nouveauLivre = new Livre({...JSON.parse(req.body.book)});
+
+        if (req.file === undefined) return;
+
+        nouveauLivre.imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+
+        await nouveauLivre.save();
+
+        res.status(200).json({ message: "Nouveau livre ajouté avec succès !"});
+    }
+    catch (erreur)
+    {
+        res.status(400).json(erreur);
+    }
 };
 
-exports.deleteBook = (req, res, next) => {
-    console.log("requête de suppression d'un livre reçue !");
+exports.putBook = async (req, res, next) => {
+    try {
+        if (req.body.book !== undefined)
+        {
+            livreMisAJour = {
+                ...JSON.parse(req.body.book),
+                imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+            };
+        }
+        else
+        {
+            livreMisAJour = {...req.body};
+        }
+        delete livreMisAJour._id;
+        await Livre.updateOne({_id: req.params.id}, livreMisAJour);
+        res.status(200).json({message: "Le livre a bien été mis à jour !"});
+    }
+    catch (erreur)
+    {
+        res.status(400).json(erreur);
+    }
 };
 
-exports.postRating = (req, res, next) => {
-    console.log("requête de notation d'un livre reçue !");
+exports.deleteBook = async (req, res, next) => {
+    try 
+    {
+        const livre = await Livre.findOne({_id: req.params.id});
+        nomImage = livre.imageUrl.split("/").pop();
+        fs.unlink("./images/" + nomImage, (erreur) => {
+            if (erreur)
+            {
+                return res.status(400).json(erreur);
+            }
+        });
+        await Livre.deleteOne({_id: req.params.id});
+        res.status(200).json({message: "Le livre a bien été supprimé !"});
+    }
+    catch (erreur) 
+    {
+        res.status(400).json(erreur);
+    }
+};
+
+exports.postRating = async (req, res, next) => {
+    if (req.body.rating < 0 || req.body.rating > 5) return res.status(400).json({message: "La note n'est pas comprise entre 0 et 5"});
+
+    try
+    {
+        livreANoter = await Livre.findOne({_id: req.params.id});
+
+        if (livreANoter.ratings.find((note) => note.userId === req.body.userId) !== undefined)
+        {
+            return res.status(400).json({message: "Ce compte a déjà attribué une note à ce livre."});
+        }
+
+        livreANoter.ratings.push({userId: req.body.userId, grade: req.body.rating});
+        moyenne = 0;
+        livreANoter.ratings.forEach(note => {
+            moyenne += note.grade;
+        });
+        moyenne /= livreANoter.ratings.length;
+        livreANoter.averageRating = moyenne;
+
+        delete livreANoter._id;
+        await Livre.updateOne({_id: req.params.id}, livreANoter);
+        
+        livre = await Livre.findOne({_id: req.params.id});
+        res.status(200).json(livre);
+    }
+    catch (erreur)
+    {
+        res.status(400).json(erreur);
+    }
 };

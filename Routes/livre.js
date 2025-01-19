@@ -5,15 +5,15 @@ const multer = require("../config/multer")
 
 const controlleurLivre = require("../Controlleurs/livre");
 
+routeur.get("/bestrating", controlleurLivre.getBestRatingBooks);
+
 routeur.get("", controlleurLivre.getBooks);
 
 routeur.get("/:id", controlleurLivre.getBook);
 
-routeur.get("/bestrating", controlleurLivre.getBestRatingBooks);
-
 routeur.post("", multer, controlleurLivre.postBook);
 
-routeur.put("/:id", controlleurLivre.putBook);
+routeur.put("/:id", multer, controlleurLivre.putBook);
 
 routeur.delete("/:id", controlleurLivre.deleteBook);
 
