@@ -10,7 +10,7 @@ exports.getBooks = async (req, res, next) => {
     }
     catch (erreur)
     {
-        res.status(500).json(erreur);
+        res.status(500).json({ erreur });
     }
 };
 
@@ -28,7 +28,7 @@ exports.getBook = async (req, res, next) => {
     }
     catch (erreur)
     {
-        res.status(400).json(erreur);
+        res.status(400).json({ erreur });
     }
 };
 
@@ -41,7 +41,7 @@ exports.getBestRatingBooks = async (req, res, next) => {
     }
     catch (erreur)
     {
-        res.status(400).json(erreur);
+        res.status(400).json({ erreur });
         console.log("test");
     }
 };
@@ -95,12 +95,12 @@ exports.putBook = async (req, res, next) => {
             return res.status(403).json({ message: "unauthorized request" });
         }
         delete livreMisAJour._id;
-        await Livre.updateOne({_id: req.params.id}, livreMisAJour);
-        res.status(200).json({message: "Le livre a bien été mis à jour !"});
+        await Livre.updateOne({ _id: req.params.id }, livreMisAJour);
+        res.status(200).json({ message: "Le livre a bien été mis à jour !" });
     }
     catch (erreur)
     {
-        res.status(400).json(erreur);
+        res.status(400).json({ erreur });
     }
 };
 
@@ -121,12 +121,12 @@ exports.deleteBook = async (req, res, next) => {
                 return res.status(400).json(erreur);
             }
         });
-        await Livre.deleteOne({_id: req.params.id});
-        res.status(200).json({message: "Le livre a bien été supprimé !"});
+        await Livre.deleteOne({ _id: req.params.id });
+        res.status(200).json({ message: "Le livre a bien été supprimé !" });
     }
     catch (erreur) 
     {
-        res.status(400).json(erreur);
+        res.status(400).json({ erreur });
     }
 };
 
@@ -139,7 +139,7 @@ exports.postRating = async (req, res, next) => {
 
         if (livreANoter.ratings.find((note) => note.userId === req.body.userId) !== undefined)
         {
-            return res.status(400).json({message: "Ce compte a déjà attribué une note à ce livre."});
+            return res.status(400).json({ message: "Ce compte a déjà attribué une note à ce livre." });
         }
 
         livreANoter.ratings.push({userId: req.body.userId, grade: req.body.rating});
@@ -151,13 +151,13 @@ exports.postRating = async (req, res, next) => {
         livreANoter.averageRating = moyenne;
 
         delete livreANoter._id;
-        await Livre.updateOne({_id: req.params.id}, livreANoter);
+        await Livre.updateOne({ _id: req.params.id }, livreANoter);
         
-        livre = await Livre.findOne({_id: req.params.id});
+        livre = await Livre.findOne({ _id: req.params.id });
         res.status(200).json(livre);
     }
     catch (erreur)
     {
-        res.status(400).json(erreur);
+        res.status(400).json({ erreur });
     }
 };
