@@ -60,7 +60,7 @@ exports.postBook = async (req, res, next) => {
     }
     catch (erreur)
     {
-        res.status(400).json(erreur);
+        res.status(400).json({erreur});
     }
 };
 
@@ -77,6 +77,10 @@ exports.putBook = async (req, res, next) => {
         {
             livreMisAJour = {...req.body};
         }
+        if (livreMisAJour.userId != req.auth.userId)
+        {
+            return res.status(403).json({ message: "unauthorized request" });
+        }
         delete livreMisAJour._id;
         await Livre.updateOne({_id: req.params.id}, livreMisAJour);
         res.status(200).json({message: "Le livre a bien été mis à jour !"});
@@ -91,6 +95,12 @@ exports.deleteBook = async (req, res, next) => {
     try 
     {
         const livre = await Livre.findOne({_id: req.params.id});
+
+        if (livre.userId != req.auth.userId)
+        {
+            return res.status(403).json({ message: "unauthorized request" });
+        }
+
         nomImage = livre.imageUrl.split("/").pop();
         fs.unlink("./images/" + nomImage, (erreur) => {
             if (erreur)

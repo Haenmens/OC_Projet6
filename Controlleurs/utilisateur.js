@@ -1,8 +1,7 @@
+const { CLEF_JWT } = require("../constant");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 const Utilisateur = require("../Modèles/Utilisateurs");
-
-const clef = "aetzwsrdxtrfcyguvhibjonk,l;m:24135zef1er3z5hg4s35b"
 
 exports.signup = (req, res, next) => {
     delete req.body._id;
@@ -41,7 +40,7 @@ exports.login = (req, res, next) => {
 
             res.status(200).json({
                 userId: utilisateur._id,
-                token: jwt.sign({ userId: utilisateur._id }, clef, { expiresIn: '1h' })
+                token: jwt.sign({ userId: utilisateur._id }, CLEF_JWT, { expiresIn: '1h' })
             });
         }).catch((erreur) => {
             return res.status(500).json({ erreur });

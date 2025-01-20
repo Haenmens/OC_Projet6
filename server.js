@@ -1,6 +1,7 @@
 const http = require('http');
 const app = require("./app");
 const { error } = require('console');
+const { PORT_SERVEUR } = require('./constant');
 
 const normaliserPort = valeur => {
     const port = parseInt(valeur, 10);
@@ -16,7 +17,7 @@ const normaliserPort = valeur => {
     return false;
 }
 
-const port = normaliserPort(process.env.PORT || 4000);
+const port = normaliserPort(process.env.PORT || PORT_SERVEUR);
 app.set('port', port);
 
 const gestionErreur = erreur => {
@@ -52,4 +53,4 @@ serveur.on("listening", () => {
     console.log("A l'écoute sur " + numeroPort);
 });
 
-serveur.listen(process.env.PORT || 4000);
+serveur.listen(process.env.PORT || PORT_SERVEUR);

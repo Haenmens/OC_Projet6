@@ -1,7 +1,8 @@
 const express = require("express");
 const routeur = express.Router();
 
-const multer = require("../config/multer")
+const multer = require("../middleware/multer");
+const authentification = require("../middleware/authentification")
 
 const controlleurLivre = require("../Controlleurs/livre");
 
@@ -11,12 +12,12 @@ routeur.get("", controlleurLivre.getBooks);
 
 routeur.get("/:id", controlleurLivre.getBook);
 
-routeur.post("", multer, controlleurLivre.postBook);
+routeur.post("", authentification, multer, controlleurLivre.postBook);
 
-routeur.put("/:id", multer, controlleurLivre.putBook);
+routeur.put("/:id", authentification, multer, controlleurLivre.putBook);
 
-routeur.delete("/:id", controlleurLivre.deleteBook);
+routeur.delete("/:id", authentification, controlleurLivre.deleteBook);
 
-routeur.post("/:id/rating", controlleurLivre.postRating);
+routeur.post("/:id/rating", authentification, controlleurLivre.postRating);
 
 module.exports = routeur;
