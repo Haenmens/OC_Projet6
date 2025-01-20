@@ -1,5 +1,6 @@
 const Livre = require("../Modèles/Livres");
 const fs = require("fs");
+const sharp = require("sharp");
 
 exports.getBooks = async (req, res, next) => {
     try 
@@ -52,7 +53,18 @@ exports.postBook = async (req, res, next) => {
 
         if (req.file === undefined) return;
 
-        nouveauLivre.imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+        fs.access("./images", (erreur) => {
+            if (erreur)
+            {
+                fs.mkdirSync("./images");
+            }
+        });
+        const { buffer, originalname } = req.file;
+        date = new Date().toISOString().replace(/:/g, "-");
+        const nouveauNom = `${originalname}-${date}.webp`;
+        await sharp(buffer).webp({ quality: 50 }).toFile("./images/" + nouveauNom);
+
+        nouveauLivre.imageUrl = `${req.protocol}://${req.get('host')}/images/${nouveauNom}`;
 
         await nouveauLivre.save();
 
@@ -60,7 +72,8 @@ exports.postBook = async (req, res, next) => {
     }
     catch (erreur)
     {
-        res.status(400).json({erreur});
+        console.log(erreur);
+        res.status(400).json({ erreur });
     }
 };
 
