@@ -1,8 +1,8 @@
 const express = require("express");
 const routeur = express.Router();
 
-const multer = require("../middleware/multer");
-const authentification = require("../middleware/authentification")
+const multer = require("../Middleware/multer");
+const authentification = require("../Middleware/authentification")
 
 const controlleurLivre = require("../Controlleurs/livre");
 

@@ -3,8 +3,9 @@ const mongoose = require("mongoose");
 const path = require("path");
 const routesUtilisateur = require("./Routes/utilisateur");
 const routesLivre = require("./Routes/livre");
+const { ADRESSE_BDD } = require("./constant.js");
 
-mongoose.connect("mongodb+srv://test_user:test_pswd@cluster0.9kp91.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+mongoose.connect(ADRESSE_BDD
     ).then(() => {
         console.log("Connection à mongodb réussie !");
     }).catch((erreur) => {

@@ -10,7 +10,7 @@ exports.getBooks = async (req, res, next) => {
     }
     catch (erreur)
     {
-        res.status(500).json({ erreur });
+        res.status(400).json({ erreur });
     }
 };
 
@@ -35,14 +35,13 @@ exports.getBook = async (req, res, next) => {
 exports.getBestRatingBooks = async (req, res, next) => {
     try
     {
-        livres = await Livre.find({});
+        const livres = await Livre.find({});
         meilleursLivres = livres.sort((livreA, livreB) => livreB.averageRating - livreA.averageRating).slice(0, 3);
         res.status(200).json(meilleursLivres);
     }
     catch (erreur)
     {
         res.status(400).json({ erreur });
-        console.log("test");
     }
 };
 
@@ -51,7 +50,7 @@ exports.postBook = async (req, res, next) => {
     {
         const nouveauLivre = new Livre({...JSON.parse(req.body.book)});
 
-        if (req.file === undefined) return;
+        if (req.file === undefined) return res.status(400).json({ message: "Image manquante ou mauvais format" });
 
         fs.access("./images", (erreur) => {
             if (erreur)
@@ -61,8 +60,11 @@ exports.postBook = async (req, res, next) => {
         });
         const { buffer, originalname } = req.file;
         date = new Date().toISOString().replace(/:/g, "-");
-        const nouveauNom = `${originalname}-${date}.webp`;
-        await sharp(buffer).webp({ quality: 50 }).toFile("./images/" + nouveauNom);
+        const nouveauNom = `${originalname}-${date}.webp`
+                            .replace(/[\/\\:*?"<>| ]/g, "_") //Caractères interdits
+                            .trim()                          //Espaces début et fin
+                            .substring(0, 255);              //Taille max 255
+        await sharp(buffer).webp({ quality: 75 }).toFile("./images/" + nouveauNom);
 
         nouveauLivre.imageUrl = `${req.protocol}://${req.get('host')}/images/${nouveauNom}`;
 
@@ -92,7 +94,7 @@ exports.putBook = async (req, res, next) => {
         }
         if (livreMisAJour.userId != req.auth.userId)
         {
-            return res.status(403).json({ message: "unauthorized request" });
+            return res.status(403).json({ message: "Requête non autorisée" });
         }
         delete livreMisAJour._id;
         await Livre.updateOne({ _id: req.params.id }, livreMisAJour);
@@ -111,7 +113,7 @@ exports.deleteBook = async (req, res, next) => {
 
         if (livre.userId != req.auth.userId)
         {
-            return res.status(403).json({ message: "unauthorized request" });
+            return res.status(403).json({ message: "Requête non autorisée" });
         }
 
         nomImage = livre.imageUrl.split("/").pop();
