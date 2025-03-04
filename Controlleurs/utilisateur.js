@@ -17,7 +17,7 @@ exports.signup = async (req, res, next) => {
     }
     catch (erreur)
     {
-        if (erreur.code === 1100)
+        if (erreur.code === 11000)
         {
             return res.status(400).json({ message: "Cette adresse mail est déjà utilisée." });
         }

@@ -74,7 +74,6 @@ exports.postBook = async (req, res, next) => {
     }
     catch (erreur)
     {
-        console.log(erreur);
         res.status(400).json({ erreur });
     }
 };

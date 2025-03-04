@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const routesUtilisateur = require("./Routes/utilisateur");
 const routesLivre = require("./Routes/livre");
-const { ADRESSE_BDD } = require("./constant.js");
+const { ADRESSE_BDD, ADRESSE_FRONT } = require("./constant.js");
 
 mongoose.connect(ADRESSE_BDD
     ).then(() => {
@@ -15,7 +15,7 @@ mongoose.connect(ADRESSE_BDD
 const app = express();
 app.use(express.json());
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', ADRESSE_FRONT);
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
     next();
