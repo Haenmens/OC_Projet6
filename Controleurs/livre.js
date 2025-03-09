@@ -1,6 +1,7 @@
 const Livre = require("../Modèles/Livres");
 const fs = require("fs");
 const sharp = require("sharp");
+const Livres = require("../Modèles/Livres");
 
 exports.getBooks = async (req, res, next) => {
     try 
@@ -82,9 +83,24 @@ exports.putBook = async (req, res, next) => {
     try {
         if (req.body.book !== undefined)
         {
+            const { buffer, originalname } = req.file;
+            date = new Date().toISOString().replace(/:/g, "-");
+            const nouveauNom = `${originalname}-${date}.webp`
+                                .replace(/[\/\\:*?"<>| ]/g, "_") //Caractères interdits
+                                .trim()                          //Espaces début et fin
+                                .substring(0, 255);              //Taille max 255
+            await sharp(buffer).webp({ quality: 75 }).toFile("./images/" + nouveauNom);
+            const livre = await Livres.findOne({ _id: req.params.id });
+            nomImage = livre.imageUrl.split("/").pop();
+            fs.unlink("./images/" + nomImage, (erreur) => {
+                if (erreur)
+                {
+                    return res.status(400).json(erreur);
+                }
+            });
             livreMisAJour = {
                 ...JSON.parse(req.body.book),
-                imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+                imageUrl: `${req.protocol}://${req.get('host')}/images/${nouveauNom}`
             };
         }
         else
