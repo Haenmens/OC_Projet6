@@ -4,7 +4,7 @@ const routeur = express.Router();
 const multer = require("../Middleware/multer");
 const authentification = require("../Middleware/authentification")
 
-const controlleurLivre = require("../Controlleurs/livre");
+const controlleurLivre = require("../Controleurs/livre");
 
 routeur.get("/bestrating", controlleurLivre.getBestRatingBooks);
 
