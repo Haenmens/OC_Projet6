@@ -33,11 +33,9 @@ const gestionErreur = erreur => {
         case "EACCESS":
             console.error(numeroPort + " requiert un privilège plus élevé");
             process.exit(1);
-            break;
         case "ADDRINUSE":
             console.error(numeroPort + " est déjà utilisé");
             process.exit(1);
-            break;
         default:
             throw erreur;
     }
